@@ -1,50 +1,54 @@
-const Thing = require('../models/thing');
-const fs = require('fs');
+const Sauce = require('../models/Sauce');
+const fs = require('fs'); // Avoir accès à des opérations liés aux systèmes de fichiers
 
-exports.createThing = (req, res, next) => {
-  const thingObject = JSON.parse(req.body.thing);
-    delete thingObject._id;
-    const thing = new Thing({
-      ...thingObject,
-      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+// Création d'une sauce
+exports.createSauce = (req, res, next) => {
+  const sauceObject = JSON.parse(req.body.sauce);
+    const sauce = new Sauce({
+      ...sauceObject, // Copie
+      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` // http://localhost3000/images/nomdufichier
     });
-    thing.save()
-      .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
+    sauce.save() // Enregistre l'objet dans la base
+      .then(() => res.status(201).json({ message: 'Sauce enregistrée !'}))
       .catch(error => res.status(400).json({ error }));
 };
 
-exports.modifyThing = (req, res, next) => {
-  const thingObject = req.file ? // Modifier l'url de l'image
+// Modification d'une sauce
+exports.modifySauce = (req, res, next) => {
+  const sauceObject = req.file ? // Modifier l'url de l'image
   {
-      ...JSON.parse(req.body.thing),
+      ...JSON.parse(req.body.sauce),
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   } : { ...req.body };
-  Thing.updateOne({ _id: req.params.id }, { ...thingObject, _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Objet modifié !'}))
+  Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) // { objet de comparaison },{ ancien objet : nouveau objet }
+    .then(() => res.status(200).json({ message: 'Sauce modifiée !'}))
     .catch(error => res.status(400).json({ error }));
 };
 
-exports.deleteThing = (req, res, next) => {
-  Thing.findOne({ _id: req.params.id })
-    .then(thing => {
-      const filename = thing.imageUrl.split('/images/')[1];
-      fs.unlink(`images/${filename}`, () => {
-        Thing.deleteOne({ _id: req.params.id })
-          .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
+// Suppression d'une sauce
+exports.deleteSauce = (req, res, next) => {
+  Sauce.findOne({ _id: req.params.id })
+    .then(sauce => {
+      const filename = sauce.imageUrl.split('/images/')[1]; // Nom de l'image
+      fs.unlink(`images/${filename}`, () => { // Supprime l'image
+        Sauce.deleteOne({ _id: req.params.id })
+          .then(() => res.status(200).json({ message: 'Sauce supprimée !'}))
           .catch(error => res.status(400).json({ error }));
       });
     })
     .catch(error => res.status(500).json({ error }));
 };
 
-exports.getOneThing = (req, res, next) => {
-    Thing.findOne({ _id: req.params.id })
-        .then(thing => res.status(200).json(thing))
+// Affichage d'une sauce
+exports.getOneSauce = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id }) // Récupérère que l'objet dont l'id est la même que l'url
+        .then(sauce => res.status(200).json(sauce))
         .catch(error => res.status(404).json({ error }));
 };
 
-exports.getAllThings = (req, res, next) => {
-    Thing.find()
-        .then(things => res.status(200).json(things))
+// Affichage de toutes les sauces
+exports.getAllSauces = (req, res, next) => {
+    Sauce.find() // Récupére le tableau de tous les sauces de la base
+        .then(sauces => res.status(200).json(sauces))
         .catch(error => res.status(400).json({ error }));
 };

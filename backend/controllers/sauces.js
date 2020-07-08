@@ -5,9 +5,12 @@ const fs = require('fs'); // Avoir accès à des opérations liés aux systèmes
 exports.createSauce = (req, res, next) => {
 	const sauceObject = JSON.parse(req.body.sauce);
 	const sauce = new Sauce({
-    ...sauceObject, // Copie
-    $pullAll: { usersLiked: req.body.userId,usersDisliked: req.body.userId },
-		imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` // http://localhost3000/images/nomdufichier
+    	...sauceObject, // Copie
+		imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`, // http://localhost3000/images/nomdufichier
+		//likes: 0,
+		//dislikes: 0,
+		//usersLiked: [""],
+		//usersDisliked : [""],
 	});
 	sauce.save() // Enregistre l'objet dans la base
 		.then(() => res.status(201).json({ message: 'Sauce enregistrée !' }))
@@ -61,8 +64,8 @@ exports.likedSauce = (req, res, next) => {
 		var sauceObject =
 			{ 
 				...JSON.parse(req.body.like),
-        $push: { usersLiked: req.body.userId },
-        //likes: 400
+        		$push: { usersLiked: req.body.userId },
+				$inc: { likes: +1 }
 			};
 		var message = "Sauce liké";
 	};
@@ -70,10 +73,10 @@ exports.likedSauce = (req, res, next) => {
 	if (req.body.like == -1) {
 		var sauceObject =
 			{
-        ...JSON.parse(req.body.like),
-        $push: { usersDisliked: req.body.userId	},
-        //$inc: { dislikes: +1 }
-      };
+        		...JSON.parse(req.body.like),
+        		$push: { usersDisliked: req.body.userId	},
+        		$inc: { dislikes: +1 }
+      		};
 		var message = "Sauce disliké";
 	};
 	// Annule le like ou dislike
@@ -81,6 +84,7 @@ exports.likedSauce = (req, res, next) => {
 		var sauceObject = 
 			{
 				...JSON.parse(req.body.like),
+				//$cond : { $in: [ req.body.userId, "$ usersLiked" ], $inc: { likes: -1 }, $inc: { dislikes: -1 } },
 				$pull: { usersLiked: req.body.userId, usersDisliked: req.body.userId }
 			};
 		var message = "Like ou dislike annulé";

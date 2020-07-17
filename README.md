@@ -9,3 +9,13 @@ Exécuter `npm install`, puis `npm start` qui démarre `ng serve` pour avoir acc
 ## Développement backend
 
 Exécuter `npm install`, puis `npm start` qui démarre `nodemon server` pour surveiller les modifications de nos fichiers et qui redémerra le serveur dès sa sauvegarde. Exécution de l'API sur `http://localhost:3000/`.
+
+## Compte admin
+
+Role : Admin pour supprimer ou modifier des tables
+User Name : ReadAndWrite
+Password : yb7fuRUidhKXicoR
+
+Role : Admin pour éditer le contenu de la base de données
+User Name : AdminModify
+Password : Acip0YvODCiw5uUe
